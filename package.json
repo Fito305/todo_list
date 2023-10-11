@@ -1,0 +1,16 @@
+{
+  "dependencies": {
+    "fastify": "^4.24.0"
+  },
+  "name": "todo_list",
+  "description": "TODO App Exercise In this exercise, you will create a To-Do list application with the following features:",
+  "version": "1.0.0",
+  "main": "../todo_list/backend/app.js",
+  "devDependencies": {},
+  "scripts": {
+    "dev": "nodemon app.js"
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC"
+}

@@ -1,0 +1,10 @@
+html {
+  border-box: box-sizing;
+  margin: 0,
+}
+
+body {
+  border-box: box-sizing;
+  margin: 0;
+  background-color: pink;
+}

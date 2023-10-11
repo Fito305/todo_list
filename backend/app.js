@@ -1,6 +1,6 @@
-import Fastify from "fastify";
+import  Fastify  from "fastify";
 
-const fastify = fastify({
+const fastify = Fastify({
   logger: true,
 });
 

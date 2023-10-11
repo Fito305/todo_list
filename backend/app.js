@@ -6,7 +6,7 @@ const fastify = Fastify({
 
 
 fastify.get('/', function  (request, reply) {
-  reply.send("Hello World")
+  reply.send("Felipon es un pingon!")
 })
 
 const port = process.env.PORT || 3000;

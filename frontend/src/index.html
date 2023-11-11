@@ -13,38 +13,40 @@
 
         <div class="div-1-parent">
           <div class="div-1">List of Todos
-           <p class="div-1-p">Hey there! Please edit your todos below.</p>
+            <p class="div-1-p">Hey there! Please edit your todos below.</p>
           </div>
         </div>
 
 
         <div class="div-2-parent">
           <div class="div-2-first-child">
-           <h1 class="div-2-fs1-h1">Please get/post/put or delete your todos</h1>
+            <h1 class="div-2-fs1-h1">List of Tasks</h1>
           </div>
-          <!-- TODO: fix the css for the form put it in a div and place it right below div-2-parent -->
-          <!-- <form class="form" method="submit"> -->
-          <!---->
-          <!--   <label> -->
-          <!--     Name of todo: -->
-          <!--     <button type="submit">Submit</button> -->
-          <!--     <input class="todo-name" name="todo-name" type="text"  required minlength="3" maxlength="8" placeholder="Todo Name"</input> -->
-          <!--   </label> -->
-          <!---->
-          <!--   <label> -->
-          <!--     Amount of todo: -->
-          <!--     <button type="submit">Submit</button> -->
-          <!--     <input class="todo-amount" name="todo-amount" type="text"  required minlength="3" maxlength="8" placeholder="Todo Amount"</input> -->
-          <!--   </label> -->
-          <!---->
-          <!-- </form> -->
-        </div>
+
+          <div class="div-2-second-child">
+            <form id="form" method="submit">
+              <label>
+                Name of todo:
+                <input id="todoName" type="text"  required  maxlength="8" placeholder="Todo Name"/>
+                <input id="index" type="hidden" value="-1" name="i" />
+              </label>
+              <label>
+                Amount of todo:
+                <input id="todoAmount" type="number"  required min="3" max="8" placeholder="Todo Amount"/>
+                <button id="submitBtn" type="submit">Submit</button>
+              </label>
+            </form>
+            <section id="container" class="container">
+              output here!
+            </section>
+          </div>
+        
+
+        </div 
 
 
       </section>
-      
-      <section id="container">
-      </section>
+
 
     </body>
 </html>

@@ -36,17 +36,36 @@ await fastify.register(cors, {
     origin: "http://127.0.0.1:8080"
 })
 
-fastify.get('/', function  (request, reply) {
-  reply.send("Felipon El Pingon")
+fastify.get('/', (request, reply) => {
+  reply.send("Pingon Va meterle el pingon a Justina")
 })
 
 
-fastify.get('/todos/', function  (request, reply) {
+fastify.get('/todos/', (request, reply) => {
   reply.send(todosList)
 })
 
+fastify.put('/todos/', async (req, res) => {
+  try {
+  const updatedTodos = await req.body;
+  // The duplicate is occuring here because if just pushing the new todo to the end.
+  todosList.push(updatedTodos)
+  res.send("PUT");
+  } catch(error){
+    console.log(error);
+    return res.send("There was an error", error)
+  }
+})
 
-fastify.delete('/todos/', function (request, reply) {
+fastify.post('/todos/', async (req, res) => {
+  // To fix the duplications splice the todoList first?
+  const updatedTodos = await req.body
+  todosList.push(updatedTodos);
+  res.send("POST");
+})
+
+
+fastify.delete('/todos/', (request, reply) => {
     todosList.splice(request.query.id, 1);
     reply.send('delete')
 })

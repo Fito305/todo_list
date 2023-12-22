@@ -4,7 +4,7 @@ const todoAmountInput = document.getElementById("todoAmount");
 const inputIndexHidden = document.getElementById("index");
 form.addEventListener("submit", submitTodo);
 
-function submitTodo(event) {
+async function submitTodo(event) {
     event.preventDefault();
 
     let i = +form.querySelector("input[name=i]").value;
@@ -15,10 +15,10 @@ function submitTodo(event) {
 
     // get data
     if (currentIndex === -1) {
-        createTodo();
+        await createTodo();
     } else {
         // edit todo item with the data inform
-        editTodo(currentIndex);
+        await editTodo(currentIndex);
         inputIndexHidden.value = "-1";
     }
 
@@ -29,10 +29,14 @@ function submitTodo(event) {
 
 };
 
-function createTodo() {
+async function createTodo() {
+    // index is -1
     // get data
     const formTodoName = todoNameInput.value;
     const formTodoAmount = +todoAmountInput.value;
+
+    // const todos = await sanitizeTodos();
+
     // const i = +form.querySelector("input[name=i]").value;
 
     // create a new object for that data.
@@ -41,42 +45,85 @@ function createTodo() {
         amount: formTodoAmount,
         completed: false
     };
-
-    todosList.push(createdObject);
-
+    
+    await fetch(`http://localhost:3000/todos/`, {
+        method: "POST",
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(createdObject)
+    })
     //append that object to the array
-
+    // todos.push(createdObject);
     display();
-
 };
 
-function populateTodoForm(event) {
+async function populateTodoForm(event) {
     //set the form to the current values of the clicked button item
+   const todos = await sanitizeTodos();
+   console.log(todos) // alot of extra arrays coming from here
+
     const i = event.target.dataset.index;
     inputIndexHidden.value = i;
-    const { name, amount, completed } = todosList[i];
+    const { name, amount, completed } = todos[i];
     todoNameInput.value = name;
     todoAmountInput.value = amount;
     //when they submit the form update the current item in the todosList 
 
 };
 
-function editTodo(index) {
-    // get data from form
-    const formTodoName = todoNameInput.value;
+
+
+async function editTodo(index) {
+     // index is not -1
+     //1. Get data from form
+    const formTodoName = todoNameInput.value; 
     const formTodoAmount = +todoAmountInput.value;
+
+    const todos = await sanitizeTodos();
+    console.log(todos);
+   
+    // 2. If the Input value is a empty string return.
     if (formTodoName === '') return;
-    // update the todo at index using the data form the form
-    todosList[index].name = formTodoName;
-    todosList[index].amount = formTodoAmount;
+
+    // if (formTodoName === todos[index].name) {
+   
+    // 3. update the todo at index using the data form the form
+    let todoName = todos[index].name = formTodoName;        
+    let todoAmount = todos[index].amount = formTodoAmount;
+    console.log(todos[index]);
+
+    //if the existing todo name has the same name as the input name feild
+    // keep the existing todo at that index. Above if index "not -1" it edits
+    // current todo at current index if not call createTodo.
+
+    //TODO: The duplicate bug happens here? TODO:
+
+    //4. I need to call the put method on the backend and update todosList // Need to add a headers: 'Content-Type': 'application/json' and stringify the body to a JSON object.
+
+    await fetch(`http://localhost:3000/todos/`, {
+        method: "put",
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(todos[index])
+    });
+//   }
 
 };
 
 async function getTodos() {
     const todos = await fetch("http://localhost:3000/todos/");
+    // console.log(todos)
     return todos;
 };
 
+async function sanitizeTodos() {
+    const res = await getTodos();
+    const todos = await res.json();
+    // console.log(todos)
+    return todos;
+}
 
 async function removeTodo(event) {
     const index = event.target.dataset.index;
@@ -114,9 +161,7 @@ function removeChildren(parent) {
 
 
 async function display() {
-    const res = await getTodos()
-    console.log(res)
-    const todos = await res.json()
+    const todos = await sanitizeTodos();
 
     const container = document.getElementById("container");
     removeChildren(container);
@@ -165,3 +210,9 @@ async function display() {
 };
 
 display();
+
+
+
+// Bugs:
+// When editing a todos at a specific index, instead of updating the current 
+// existing todo, it creates a new todo. (Inside editTodo?)

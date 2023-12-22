@@ -4,30 +4,6 @@ const todoAmountInput = document.getElementById("todoAmount");
 const inputIndexHidden = document.getElementById("index");
 form.addEventListener("submit", submitTodo);
 
-const todosList = [
-    {
-        name: 'calls',
-        amount: 5,
-        completed: false,
-    },
-    {
-        name: 'appointment',
-        amount: 10,
-        completed: false,
-    },
-    {
-        name: 'followUps',
-        amount: 15,
-        completed: false,
-    },
-    {
-        name: 'closing',
-        amount: 6,
-        completed: false,
-    }
-];
-
-
 function submitTodo(event) {
     event.preventDefault();
 
@@ -38,11 +14,11 @@ function submitTodo(event) {
     const currentIndex = i;
 
     // get data
-    if (currentIndex === -1){
+    if (currentIndex === -1) {
         createTodo();
     } else {
         // edit todo item with the data inform
-        editTodo(currentIndex);  
+        editTodo(currentIndex);
         inputIndexHidden.value = "-1";
     }
 
@@ -78,7 +54,7 @@ function populateTodoForm(event) {
     //set the form to the current values of the clicked button item
     const i = event.target.dataset.index;
     inputIndexHidden.value = i;
-    const {name, amount, completed} = todosList[i];
+    const { name, amount, completed } = todosList[i];
     todoNameInput.value = name;
     todoAmountInput.value = amount;
     //when they submit the form update the current item in the todosList 
@@ -96,15 +72,18 @@ function editTodo(index) {
 
 };
 
-function getTodos() {
-    // get data form backend
-    return todosList;
+async function getTodos() {
+    const todos = await fetch("http://localhost:3000/todos/");
+    return todos;
 };
 
 
-function removeTodo(event){
+async function removeTodo(event) {
     const index = event.target.dataset.index;
-    todosList.splice(index, 1);
+    // THe querystring is ? and its sending the index to the backend to splice.
+    await fetch(`http://localhost:3000/todos/?id=${index}`, {
+        method: "delete",
+    })
     display();
 };
 
@@ -128,19 +107,22 @@ function markUncomplete(event) {
 };
 
 function removeChildren(parent) {
-    while(parent.firstChild) {
+    while (parent.firstChild) {
         parent.removeChild(parent.firstChild);
     };
 };
 
 
-function display() {
-    const todos = getTodos();
+async function display() {
+    const res = await getTodos()
+    console.log(res)
+    const todos = await res.json()
+
     const container = document.getElementById("container");
     removeChildren(container);
 
-    for (let i = 0; i < todosList.length; i ++) {
-        const {name, amount, completed} = todosList[i];
+    for (let i = 0; i < todos.length; i++) {
+        const { name, amount, completed } = todos[i];
         const div = document.createElement('div');
         div.classList.add("inner-container");
         const h1 = document.createElement("h1");

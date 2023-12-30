@@ -1,103 +1,122 @@
 const form = document.getElementById('form');
-const todoNameInput = document.getElementById("todoName");
-const todoAmountInput = document.getElementById("todoAmount");
-const inputIndexHidden = document.getElementById("index");
-form.addEventListener("submit", submitTodo);
+const inputName = document.getElementById("todoName");
+const inputAmount = document.getElementById("todoAmount");
+const inputIndexHidden = document.getElementById("id");
+// const subBtn = document.getElementById("submitBtn");
+// console.log(subBtn)
+
+form.addEventListener("submit", submitTodo)
+
 
 async function submitTodo(event) {
     event.preventDefault();
-
-    let i = +form.querySelector("input[name=i]").value;
-    // inputIndexHidden.value = i;
-
-    // const currentIndex = +inputIndexHidden.value;
-    const currentIndex = i;
-
-    // get data
-    if (currentIndex === -1) {
-        await createTodo();
-    } else {
-        // edit todo item with the data inform
-        await editTodo(currentIndex);
-        inputIndexHidden.value = "-1";
-    }
-
-    todoNameInput.value = '';
-    todoAmountInput.value = '';
-
+    // This is the hidden input vvalue of the hidden input is value="-1"
+    let currentId = +form.querySelector("input[name=i]").value;
+    // console.log(currentId)
+    // dataset hidden input
+        // console.log(inputIndexHidden.value)
+        // get data
+        // // was currentId === -1
+        //// iden =dataset.id and id = -1
+        if (currentId === -1) {
+            console.log(currentId, "Gets called when id = -1");
+              createTodo();
+        }
+        else {
+            // edit todo item with the data inform
+            console.log(currentId, "Gets called when id is not -1");
+             editTodo(currentId);
+             // const todos = await getTodos();
+             // display();
+            inputIndexHidden.value = "-1";
+            // console.log(inputIndexHidden)
+        }
+    inputName.value = '';
+    inputAmount.value = '';
     display();
+};
 
+
+async function getTodos() {
+    const res = await fetch("http://localhost:3000/todos/");
+    const todos = await res.json();
+    return todos;
+};
+
+//TODO:  START HERE!!!!!!! Its a helper function.
+async function getTodoById(id) {
+    const todos = await getTodos();
+    return todos.find((todo) => {
+        console.log(todo.id == id);  // returns a boolean
+        return todo.id == id;
+    });
 };
 
 async function createTodo() {
-    // index is -1
     // get data
-    const formTodoName = todoNameInput.value;
-    const formTodoAmount = +todoAmountInput.value;
-
-    // const todos = await sanitizeTodos();
-
-    // const i = +form.querySelector("input[name=i]").value;
+    const formName = inputName.value;
+    const formAmount = +inputAmount.value;
 
     // create a new object for that data.
-    const createdObject = {
-        name: formTodoName,
-        amount: formTodoAmount,
+    // //TODO: added the new Date().getTime() to generate random number for id
+    const newTodo = {
+        id: new Date().getTime(),
+        name: formName,
+        amount: formAmount,
         completed: false
     };
-    
+
     await fetch(`http://localhost:3000/todos/`, {
         method: "POST",
         headers: {
             'Content-Type': 'application/json'
         },
-        body: JSON.stringify(createdObject)
+        body: JSON.stringify(newTodo)
     })
     //append that object to the array
     // todos.push(createdObject);
     display();
 };
 
-async function populateTodoForm(event) {
+async function populateInputName(event) {
     //set the form to the current values of the clicked button item
-   const todos = await sanitizeTodos();
-   console.log(todos) // alot of extra arrays coming from here
-
-    const i = event.target.dataset.index;
-    inputIndexHidden.value = i;
-    const { name, amount, completed } = todos[i];
-    todoNameInput.value = name;
-    todoAmountInput.value = amount;
+    //TODO: this changed
+    const identification = event.target.dataset.id;
+    // console.log(identification)
+    const todo = await getTodoById(identification);
+    if (!todo) return;
+    // console.log(todo)
+    const { name, amount, completed, id } = todo;
+    // console.log(name)
+    inputName.value = name;
+    inputAmount.value = amount;
+    inputIndexHidden.value = id;
+    // console.log(inputIndexHidden)
     //when they submit the form update the current item in the todosList 
-
 };
 
 
 
 async function editTodo(index) {
-     // index is not -1
-     //1. Get data from form
-    const formTodoName = todoNameInput.value; 
-    const formTodoAmount = +todoAmountInput.value;
+    console.log(index);
+    // The index is the dataset.id
+    // index is not -1
+    //1. Get data from form
+    let formTodoName = inputName.value;
+    let formTodoAmount = +inputAmount.value;
 
-    const todos = await sanitizeTodos();
-    console.log(todos);
-   
+
+    let identification = index;
+    const todo = await getTodoById(identification);
     // 2. If the Input value is a empty string return.
     if (formTodoName === '') return;
-
-    // if (formTodoName === todos[index].name) {
-   
     // 3. update the todo at index using the data form the form
-    let todoName = todos[index].name = formTodoName;        
-    let todoAmount = todos[index].amount = formTodoAmount;
-    console.log(todos[index]);
-
-    //if the existing todo name has the same name as the input name feild
-    // keep the existing todo at that index. Above if index "not -1" it edits
-    // current todo at current index if not call createTodo.
-
-    //TODO: The duplicate bug happens here? TODO:
+    todo.name = formTodoName;
+    console.log(todo.name)
+    todo.amount = formTodoAmount;
+    console.log(todo.amount)
+    todo.id = identification;
+    console.log(todo)
 
     //4. I need to call the put method on the backend and update todosList // Need to add a headers: 'Content-Type': 'application/json' and stringify the body to a JSON object.
 
@@ -106,29 +125,22 @@ async function editTodo(index) {
         headers: {
             'Content-Type': 'application/json'
         },
-        body: JSON.stringify(todos[index])
+        body: JSON.stringify(todo)
     });
-//   }
 
+    display();
 };
 
-async function getTodos() {
-    const todos = await fetch("http://localhost:3000/todos/");
-    // console.log(todos)
-    return todos;
-};
-
-async function sanitizeTodos() {
-    const res = await getTodos();
-    const todos = await res.json();
-    // console.log(todos)
-    return todos;
-}
-
+//BUG: The remove function targets the right dataset.id but deletes the todo below it.
 async function removeTodo(event) {
-    const index = event.target.dataset.index;
+    const id = event.target.dataset.id;
+    console.log(id)
+    const todo = await getTodoById(id); // returns a boolean
+    console.log(todo.id)
+    const todoId = todo.id;
+    console.log(todoId)
     // THe querystring is ? and its sending the index to the backend to splice.
-    await fetch(`http://localhost:3000/todos/?id=${index}`, {
+    await fetch(`http://localhost:3000/todos/?id=${todoId}`, {
         method: "delete",
     })
     display();
@@ -136,10 +148,9 @@ async function removeTodo(event) {
 
 
 function markTodoComplete(event) {
-    const i = event.target.dataset.index;
+    const i = event.target.dataset.id;
     // const RECLICK_TIME = 5000;
     // const TIME_SINCE_LAST_CLICK = event.timeStamp;
-
     todosList[i].completed = true;
     display();
     // if (TIME_SINCE_LAST_CLICK > RECLICK_TIME) {
@@ -148,8 +159,9 @@ function markTodoComplete(event) {
 };
 
 function markUncomplete(event) {
-    const i = event.target.dataset.index;
-    todosList[i].completed = false;
+    //TODO: recently added
+    const id = event.target.dataset.id;
+    todosList[id].completed = false;
     display();
 };
 
@@ -161,21 +173,25 @@ function removeChildren(parent) {
 
 
 async function display() {
-    const todos = await sanitizeTodos();
+    const todos = await getTodos();
 
     const container = document.getElementById("container");
     removeChildren(container);
 
-    for (let i = 0; i < todos.length; i++) {
-        const { name, amount, completed } = todos[i];
+    //TODO: recently added
+    for (const todo of todos) {
+        //TODO: Recently added! Im destructuring the `id` from the todos here
+        const { name, amount, completed, id } = todo;
         const div = document.createElement('div');
         div.classList.add("inner-container");
         const h1 = document.createElement("h1");
         const p1 = document.createElement("p");
         const p2 = document.createElement("p");
+        const p3 = document.createElement("p")
         h1.innerHTML = `Name: ${name}`;
         p1.innerHTML = `Amount: ${amount}`;
         p2.innerHTML = `Completed: ${completed}`;
+        p3.innerHTML = `Identification: ${id}`;
 
         const editButton = document.createElement('button');
         const removeButton = document.createElement('button');
@@ -185,11 +201,20 @@ async function display() {
         todoCompleteButton.type = 'radio';
         todoUncompleteButton.type = 'radio';
         editButton.innerHTML = 'Edit';
-        editButton.dataset.index = i;
-        removeButton.dataset.index = i;
+        //TODO: added the destructured `id` to the dataset
+        editButton.dataset.id = id;
+        removeButton.dataset.id = id;
         removeButton.innerHTML = 'Remove';
-        todoCompleteButton.dataset.index = i;
-        todoUncompleteButton.dataset.index = i;
+
+        //TODO: added the destructured `id` to the dataset
+        todoCompleteButton.dataset.id = id;
+        todoUncompleteButton.dataset.id = id;
+
+        // Added this
+        // form.dataset.id = id;
+        // subBtn.dataset.id = id;
+
+        //TODO: the `id` will equal the number of each todosList `id` property
 
         div.appendChild(h1);
         div.appendChild(p1);
@@ -199,19 +224,19 @@ async function display() {
         div.appendChild(todoUncompleteButton);
         div.appendChild(todoCompleteButton);
 
-        editButton.addEventListener("click", populateTodoForm);
+        editButton.addEventListener("click", populateInputName);
         removeButton.addEventListener("click", removeTodo);
         todoCompleteButton.addEventListener("click", markTodoComplete);
         todoUncompleteButton.addEventListener("click", markUncomplete);
 
+        // Moved this from global scope to inside the scope of this for loop.
+        // form.addEventListener("submit", submitTodo)
+        
         container.appendChild(div);
     };
-
 };
 
 display();
-
-
 
 // Bugs:
 // When editing a todos at a specific index, instead of updating the current 
